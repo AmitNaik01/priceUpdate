@@ -1,0 +1,36 @@
+import pandas as pd
+from woocommerce import API
+
+# WooCommerce API connection
+wcapi = API(
+    url="https://luxxesims.com",
+    consumer_key="ck_ee0139299eb6f20c9293f73095993a1312a6bc88",
+    consumer_secret="cs_918d271a1ea54393365dedaf9a1e2111f70ab935",
+    version="wc/v3",
+    timeout=50
+)
+
+# Read Excel
+df = pd.read_excel("japan.xlsx")
+
+# Clean column names: remove spaces and newlines
+df.columns = df.columns.str.replace("\n", "").str.strip()
+
+# Check column names
+print(df.columns)
+
+# Loop through rows to update WooCommerce prices
+for index, row in df.iterrows():
+    sku = str(row["API Product code（Auto Activate）"]).strip()
+    price = str(row["Retail Price USD"]).strip()
+    
+    # Find product by SKU
+    response = wcapi.get("products", params={"sku": sku}).json()
+    if response:
+        product_id = response[0]["id"]
+        
+        # Update product price
+        update = wcapi.put(f"products/{product_id}", data={"regular_price": price}).json()
+        print(f"Updated SKU {sku}: New Price = {update.get('regular_price')}")
+    else:
+        print(f"SKU {sku} not found in WooCommerce.")

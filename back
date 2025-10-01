@@ -1,0 +1,17 @@
+from woocommerce import API
+import pandas as pd
+
+# WooCommerce API connection
+wcapi = API(
+    url="https://luxxesims.com",   # 🔹 change to your real site URL
+    consumer_key="ck_ee0139299eb6f20c9293f73095993a1312a6bc88",
+    consumer_secret="cs_918d271a1ea54393365dedaf9a1e2111f70ab935",
+    version="wc/v3",
+    timeout=50
+)
+
+# ✅ Test connection: Get first 5 products
+products = wcapi.get("products", params={"per_page": 5}).json()
+
+for p in products:
+    print(p["id"], p["sku"], p["name"], p["regular_price"])
